@@ -60,4 +60,5 @@ Happy coding!
 
 ## External links:
 [Wikipedia: Quadtree](https://en.wikipedia.org/wiki/Quadtree)
+
 [Wikipedia: Collision detection](https://en.wikipedia.org/wiki/Collision_detection)
