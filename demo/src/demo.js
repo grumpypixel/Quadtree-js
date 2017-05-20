@@ -406,7 +406,7 @@ function rebuildQuadtree() {
   quadtree.clear();
   const count = objects.length;
   for (let i = 0; i < count; ++i) {
-    quadtree.insertObject(objects[i]);
+    quadtree.insert(objects[i]);
   }
 }
 

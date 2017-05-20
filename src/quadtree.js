@@ -2,7 +2,7 @@
 
 class Quadtree {
 
-  constructor(rect, maxObjects=5, maxLevel=4, level=0) {
+  constructor(rect, maxObjects=10, maxLevel=4, level=0) {
     this.rect = rect;
     this.maxObjects = Math.max(0, maxObjects);
     this.maxLevel = Math.max(0, maxLevel);
@@ -11,7 +11,7 @@ class Quadtree {
     this.objects = [];
   }
 
-  insertObject(obj) {
+  insert(obj) {
     const index = this.findChildNodeIndex(obj);
     if (index === -1) {
       this.objects.push(obj);
@@ -19,25 +19,8 @@ class Quadtree {
         this.split();
       }
     } else {
-      this.nodes[index].insertObject(obj);
+      this.nodes[index].insert(obj);
     }
-  }
-
-  removeObjectById(id) {
-    const objCount = this.objects.length;
-    for (let i = 0; i < objCount; ++i) {
-      if (this.objects[i].id === id) {
-        this.objects.splice(i, 1);
-        return true;
-      }
-    }
-    const nodeCount = this.nodes.length;
-    for (let i = 0; i < nodeCount; ++i) {
-      if (this.nodes[i].removeObjectById(id)) {
-        return true;
-      }
-    }
-    return false;
   }
 
   clear() {
@@ -66,6 +49,15 @@ class Quadtree {
     }
   }
 
+  rebuild() {
+    const objects = this.getAllObjects();
+    this.clear();
+    const count = objects.length;
+    for (let i = 0; i < count; ++i) {
+      this.insert(objects[i]);
+    }
+  }
+
   getAllObjects() {
     let allObjects = [];
     if (this.objects.length > 0) {
@@ -79,13 +71,21 @@ class Quadtree {
     return allObjects;
   }
 
-  rebuild() {
-    const objects = this.getAllObjects();
-    this.clear();
-    const count = objects.length;
-    for (let i = 0; i < count; ++i) {
-      this.insertObject(objects[i]);
+  removeObjectById(id) {
+    const objCount = this.objects.length;
+    for (let i = 0; i < objCount; ++i) {
+      if (this.objects[i].id === id) {
+        this.objects.splice(i, 1);
+        return true;
+      }
     }
+    const nodeCount = this.nodes.length;
+    for (let i = 0; i < nodeCount; ++i) {
+      if (this.nodes[i].removeObjectById(id)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   findChildNodeIndex(obj) {
@@ -119,7 +119,7 @@ class Quadtree {
     for (let i = 0; i < this.objects.length; ) {
       const index = this.findChildNodeIndex(this.objects[i]);
       if (index !== -1) {
-        this.nodes[index].insertObject(this.objects.splice(i, 1)[0]);
+        this.nodes[index].insert(this.objects.splice(i, 1)[0]);
       } else {
         ++i;
       }

@@ -21,7 +21,7 @@ let quadtree = new Quadtree({
 
 Inserting an object into the Quadtree.
 <pre>
-quadtree.insertObject({
+quadtree.insert({
 	x: 233,
 	y: 144,
 	width: 89,
@@ -47,7 +47,7 @@ First, clear the Quadtree and then re-insert all objects.
 <pre>
 quadtree.clear();
 for (let i = 0; i < objects.length; ++i) {
-  quadtree.insertObject(objects[i]);
+  quadtree.insert(objects[i]);
 }
 </pre>
 
