@@ -320,15 +320,16 @@ function detectCollisionsBruteForce(canvas, context, objects) {
   let numTotalCandidates = 0;
   let numTotalCollisions = 0;
   const count = objects.length;
-  for (let i = 0; i < count; ++i) {
-    for (let j = 0; j < count; ++j) {
+  for (let i = 0; i < count-1; ++i) {
+    for (let j = i+1; j < count; ++j) {
       if (objects[i].id !== objects[j].id) {
         numTotalCandidates += 1;
         if (testCollisionBetweenObjects(objects[i], objects[j])) {
           if (options.highlightCollisions) {
+            drawObject(canvas, context, objects[i], options.collisionColor, true);
             drawObject(canvas, context, objects[j], options.collisionColor, true);
           }
-          numTotalCollisions += 1;
+          numTotalCollisions += 2;
         }
       }
     }
