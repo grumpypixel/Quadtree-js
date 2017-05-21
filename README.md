@@ -6,7 +6,7 @@ Quadtrees are tree data structures which can i.e. help to reduce the number of p
 
 ## How to use
 
-Creating a new Quadtree works as follows.
+Creating a new Quadtree works as follows. The parameters maxObjects and maxLevel are optional. The maxObjects parameter (default: 10) specifies the max. number of objects that can be stored in a single node before it gets subdivided. The maxLevel parameter (default: 4) specifies the max. number of subdivisions per node.
 <pre>
 let quadtree = new Quadtree({
     x: 0,
@@ -14,18 +14,19 @@ let quadtree = new Quadtree({
     width: 512,
     height: 512
   },
-  maxObjects,  // optional (default: 10); max. number of objects that can be stored in a node before it will be subdivided
-  maxLevel);   // optional (default: 4); max. number of subdivisions per node
+  maxObjects,
+  maxLevel);
 </pre>
-
 
 Inserting an object into the Quadtree.
 <pre>
 quadtree.insert({
-	x: 233,
-	y: 144,
-	width: 89,
-	height: 55
+  x: 233,
+  y: 144,
+  width: 89,
+  height: 55,
+  id: 5,     // optional id property
+  tag: 'foo' // optional tag property
 });
 </pre>
 
@@ -54,6 +55,25 @@ for (let i = 0; i < objects.length; ++i) {
 Second, you can simply update the Quadtree by calling the method rebuild(). This method will collect all objects from all nodes in the tree first by calling getAllObjects() and the re-insert these objects. This is obviously not the fastest way to do this but it still may be fast enough depending on your needs.
 <pre>
 quadtree.rebuild();
+</pre>
+
+Finding an object with a specific id.
+<pre>
+const id = 610;
+const obj = quadtree.findObjectById(id);
+</pre>
+
+Removing an object with a specific id.
+<pre>
+const id = 987;
+const obj = quadtree.removeObjectById(id);
+</pre>
+
+Finding objects with a specific tag.
+<pre>
+const tag = 'foo';
+let objects = [];
+quadtree.findObjectsWithTag(tag, objects);
 </pre>
 
 Happy coding!
