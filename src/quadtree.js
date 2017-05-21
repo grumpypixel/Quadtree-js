@@ -105,6 +105,19 @@ class Quadtree {
     return false;
   }
 
+  findObjectsWithTag(tag, outObjects) {
+    const objCount = this.objects.length;
+    for (let i = 0; i < objCount; ++i) {
+      if (this.objects[i].tag === tag) {
+        outObjects.push(this.objects[i]);
+      }
+    }
+    const nodeCount = this.nodes.length;
+    for (let i = 0; i < nodeCount; ++i) {
+      this.nodes[i].findObjectsWithTag(tag, outObjects);
+    }
+  }
+
   findChildNodeIndex(obj) {
     const count = this.nodes.length;
     for (let i = 0; i < count; ++i) {
