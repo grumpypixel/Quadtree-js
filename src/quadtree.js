@@ -92,17 +92,17 @@ class Quadtree {
     const objCount = this.objects.length;
     for (let i = 0; i < objCount; ++i) {
       if (this.objects[i].id === id) {
-        this.objects.splice(i, 1);
-        return true;
+        return this.objects.splice(i, 1)[0];
       }
     }
     const nodeCount = this.nodes.length;
     for (let i = 0; i < nodeCount; ++i) {
-      if (this.nodes[i].removeObjectById(id)) {
-        return true;
+      const obj = this.nodes[i].removeObjectById(id);
+      if (obj !== null) {
+        return obj;
       }
     }
-    return false;
+    return null;
   }
 
   findObjectsWithTag(tag, outObjects) {
