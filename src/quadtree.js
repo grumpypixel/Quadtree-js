@@ -71,6 +71,23 @@ class Quadtree {
     return allObjects;
   }
 
+  findObjectById(id) {
+    const objCount = this.objects.length;
+    for (let i = 0; i < objCount; ++i) {
+      if (this.objects[i].id === id) {
+        return this.objects[i];
+      }
+    }
+    const nodeCount = this.nodes.length;
+    for (let i = 0; i < nodeCount; ++i) {
+      const obj = this.nodes[i].findObjectById(id);
+      if (obj !== null) {
+        return obj;
+      }
+    }
+    return null;
+  }
+
   removeObjectById(id) {
     const objCount = this.objects.length;
     for (let i = 0; i < objCount; ++i) {
