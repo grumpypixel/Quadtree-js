@@ -35,7 +35,7 @@ const options = {
 
 let quadtree = null;
 let objects = [];
-let testRect = { x:0, y:0, width:64, height:64 };
+let testRect = { x: 0, y: 0, width: 64, height: 64 };
 let canvasOriginOffset = {};
 let nextObjId = 0;
 
@@ -128,7 +128,12 @@ function updateFrame() {
     CanvasRenderer.drawText(context, canvas.width-textMargin.right, canvas.height-textMargin.bottom, 'detected collisions: ' + collisionDetectionResults.collisions.toString(), options.infoColor, 'right', font);
   }
 
-  const bounds = {left: -canvas.width * 0.5, right:canvas.width * 0.5, top:canvas.height * 0.5, bottom:-canvas.height * 0.5};
+  const bounds = {
+    left: -canvas.width * 0.5,
+    right: canvas.width * 0.5,
+    top: canvas.height * 0.5,
+    bottom: -canvas.height * 0.5
+  };
   updateObjectPositions(objects, timer.deltaTime, bounds);
 
   window.requestAnimationFrame(updateFrame);
@@ -246,10 +251,10 @@ function createRandomObject(color) {
   const x = Random.randomMinMax(-halfWidth + size, halfWidth - size);
   const y = Random.randomMinMax(-halfHeight + size, halfHeight - size);
   const velocity = Random.randomPointInCircle(options.minSpeed, options.maxSpeed);
-  return createObject(x, y, radius, color, velocity);
+  return createObject(x, y, radius, color, velocity, nextId());
 }
 
-function createObject(x, y, radius, color, velocity) {
+function createObject(x, y, radius, color, velocity, id) {
   const size = 2 * radius;
   return {
     x: x,
@@ -259,7 +264,7 @@ function createObject(x, y, radius, color, velocity) {
     color: color,
     radius: radius,
     velocity: velocity,
-    id: nextId()
+    id: id
   };
 }
 
@@ -414,7 +419,7 @@ function rebuildQuadtree() {
 function convertCartesianToCanvasCoordinates(canvas, x, y) {
   const xx = x + canvasOriginOffset.x;
   const yy = canvas.height - (y + canvasOriginOffset.y);
-  return { x:xx, y:yy };
+  return { x: xx, y: yy };
 }
 
 function getCanvas() {

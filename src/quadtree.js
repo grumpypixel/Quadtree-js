@@ -37,7 +37,8 @@ class Quadtree {
   findCandidates(rect, outCandidates) {
     const objCount = this.objects.length;
     const nodeCount = this.nodes.length;
-    if (objCount == 0 && nodeCount == 0
+    if (objCount == 0
+      && nodeCount == 0
       || this.testRectIntersection(rect, this.rect) === false) {
       return;
     }
@@ -63,7 +64,6 @@ class Quadtree {
     if (this.objects.length > 0) {
       allObjects = allObjects.concat(this.objects);
     }
-
     const count = this.nodes.length;
     for (let i = 0; i < count; ++i) {
       allObjects = allObjects.concat(this.nodes[i].getAllObjects());
@@ -181,20 +181,6 @@ class Quadtree {
     if (lhs.y + lhsHalfHeight < rhs.y - rhsHalfHeight) return false;
     if (lhs.y - lhsHalfHeight > rhs.y + rhsHalfHeight) return false;
     return true;
-  }
-
-  dump() {
-    console.log('dump, level=' + this.level + ', nodes=' + this.nodes.length);
-    console.log('objects:');
-    for (let i = 0; i < this.objects.length; ++i) {
-      console.log(i, this.objects[i]);
-    }
-    if (this.nodes.length > 0) {
-      console.log('nodes:');
-      for (let i = 0; i < this.nodes.length; ++i) {
-        this.nodes[i].dump();
-      }
-    }
   }
 
   drawBounds(context, color, canvasOriginOffset, canvasHeight) {
