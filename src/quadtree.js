@@ -23,6 +23,23 @@ class Quadtree {
     }
   }
 
+  remove(obj) {
+    const objCount = this.objects.length;
+    for (let i = 0; i < objCount; ++i) {
+      if (this.objects[i] === obj) {
+        return this.objects.splice(i, 1)[0];
+      }
+    }
+    const nodeCount = this.nodes.length;
+    for (let i = 0; i < nodeCount; ++i) {
+      const ret = this.nodes[i].remove(obj);
+      if (ret !== null) {
+        return ret;
+      }
+    }
+    return null;
+  }
+
   clear() {
     this.objects.length = 0;
     const count = this.nodes.length;
