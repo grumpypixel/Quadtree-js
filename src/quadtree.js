@@ -16,7 +16,7 @@ class Quadtree {
     if (index === -1) {
       this.objects.push(obj);
       if (this.objects.length > this.maxObjects && this.level < this.maxLevel) {
-        this.split();
+        this.__split();
       }
     } else {
       this.nodes[index].insert(obj);
@@ -56,7 +56,7 @@ class Quadtree {
     const nodeCount = this.nodes.length;
     if (objCount == 0
       && nodeCount == 0
-      || this.testRectIntersection(rect, this.rect) === false) {
+      || this.__testRectIntersection(rect, this.rect) === false) {
       return;
     }
     for (let i = 0; i < objCount; ++i) {
@@ -138,14 +138,47 @@ class Quadtree {
   findChildNodeIndex(obj) {
     const count = this.nodes.length;
     for (let i = 0; i < count; ++i) {
-      if (this.isObjectInsideRect(obj, this.nodes[i].rect)) {
+      if (this.__isObjectInsideRect(obj, this.nodes[i].rect)) {
         return i;
       }
     }
     return -1;
   }
 
-  split() {
+  drawBounds(context, color, canvasOriginOffset, canvasHeight) {
+    // Convert cartesian coordinates to canvas coordinates:
+    const x = this.rect.x + canvasOriginOffset.x;
+    const y = canvasHeight - (this.rect.y + canvasOriginOffset.y);
+    const halfWidth = this.rect.width * 0.5;
+    const halfHeight = this.rect.height * 0.5;
+    this.__drawRect(context, x - halfWidth, y - halfHeight, this.rect.width, this.rect.height, color);
+    for (let i = 0; i < this.nodes.length; ++i) {
+      this.nodes[i].drawBounds(context, color, canvasOriginOffset, canvasHeight);
+    }
+  }
+
+  drawObjects(context, color, canvasOriginOffset, canvasHeight) {
+    const objCount = this.objects.length;
+    for (let i = 0; i < objCount; ++i) {
+      const obj = this.objects[i];
+      const x = obj.x + canvasOriginOffset.x;
+      const y = canvasHeight - (obj.y + canvasOriginOffset.y);
+      const halfWidth = obj.width * 0.5;
+      const halfHeight = obj.height * 0.5;
+      this.__drawRect(context, x - halfWidth, y - halfHeight, obj.width, obj.height, color);
+    }
+    const nodeCount = this.nodes.length;
+    for (let i = 0; i < nodeCount; ++i) {
+      this.nodes[i].drawObjects(context, color, canvasOriginOffset, canvasHeight);
+    }
+  }
+
+  __drawRect(context, x, y, width, height, color) {
+    context.strokeStyle = color;
+    context.strokeRect(x, y, width, height);
+  }
+
+  __split() {
     if (this.nodes.length === 0) {
       const halfWidth = this.rect.width * 0.5;
       const halfHeight = this.rect.height * 0.5;
@@ -173,7 +206,7 @@ class Quadtree {
     }
   }
 
-  isObjectInsideRect(obj, rect) {
+  __isObjectInsideRect(obj, rect) {
     const halfWidth = rect.width * 0.5;
     const objHalfWidth = obj.width * 0.5;
     if (obj.x - objHalfWidth > rect.x - halfWidth
@@ -188,7 +221,7 @@ class Quadtree {
     return false;
   }
 
-  testRectIntersection(lhs, rhs) {
+  __testRectIntersection(lhs, rhs) {
     const lhsHalfWidth = lhs.width * 0.5;
     const rhsHalfWidth = rhs.width * 0.5;
     if (lhs.x + lhsHalfWidth < rhs.x - rhsHalfWidth) return false;
@@ -198,38 +231,5 @@ class Quadtree {
     if (lhs.y + lhsHalfHeight < rhs.y - rhsHalfHeight) return false;
     if (lhs.y - lhsHalfHeight > rhs.y + rhsHalfHeight) return false;
     return true;
-  }
-
-  drawBounds(context, color, canvasOriginOffset, canvasHeight) {
-    // Convert cartesian coordinates to canvas coordinates:
-    const x = this.rect.x + canvasOriginOffset.x;
-    const y = canvasHeight - (this.rect.y + canvasOriginOffset.y);
-    const halfWidth = this.rect.width * 0.5;
-    const halfHeight = this.rect.height * 0.5;
-    this.drawRect(context, x - halfWidth, y - halfHeight, this.rect.width, this.rect.height, color);
-    for (let i = 0; i < this.nodes.length; ++i) {
-      this.nodes[i].drawBounds(context, color, canvasOriginOffset, canvasHeight);
-    }
-  }
-
-  drawObjects(context, color, canvasOriginOffset, canvasHeight) {
-    const objCount = this.objects.length;
-    for (let i = 0; i < objCount; ++i) {
-      const obj = this.objects[i];
-      const x = obj.x + canvasOriginOffset.x;
-      const y = canvasHeight - (obj.y + canvasOriginOffset.y);
-      const halfWidth = obj.width * 0.5;
-      const halfHeight = obj.height * 0.5;
-      this.drawRect(context, x - halfWidth, y - halfHeight, obj.width, obj.height, color);
-    }
-    const nodeCount = this.nodes.length;
-    for (let i = 0; i < nodeCount; ++i) {
-      this.nodes[i].drawObjects(context, color, canvasOriginOffset, canvasHeight);
-    }
-  }
-
-  drawRect(context, x, y, width, height, color) {
-    context.strokeStyle = color;
-    context.strokeRect(x, y, width, height);
   }
 }
