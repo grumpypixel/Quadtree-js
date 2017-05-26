@@ -6,6 +6,7 @@ const font = 'bold 16px Courier';
 
 const options = {
   numObjects: 512,
+  freezeMovement: false,
   minRadius: 5,
   maxRadius: 10,
   minSpeed: 20,
@@ -18,7 +19,7 @@ const options = {
   bruteForceCollisionDetection: false,
   collisionDetectionEnabled: true,
   showBounds: true,
-  renderObjects: true,
+  drawObjects: true,
   highlightCollisions: true,
   displayInfo: true,
   lineWidth: 1,
@@ -105,7 +106,7 @@ function updateFrame() {
     }
   }
 
-  if (options.renderObjects) {
+  if (options.drawObjects) {
     drawObjects(canvas, context, objects, options.objectColor, false);
   }
 
@@ -128,13 +129,15 @@ function updateFrame() {
     CanvasRenderer.drawText(context, canvas.width-textMargin.right, canvas.height-textMargin.bottom, 'detected collisions: ' + collisionDetectionResults.collisions.toString(), options.infoColor, 'right', font);
   }
 
-  const bounds = {
-    left: -canvas.width * 0.5,
-    right: canvas.width * 0.5,
-    top: canvas.height * 0.5,
-    bottom: -canvas.height * 0.5
-  };
-  updateObjectPositions(objects, timer.deltaTime, bounds);
+  if (options.freezeMovement === false) {
+    const bounds = {
+      left: -canvas.width * 0.5,
+      right: canvas.width * 0.5,
+      top: canvas.height * 0.5,
+      bottom: -canvas.height * 0.5
+    };
+    updateObjectPositions(objects, timer.deltaTime, bounds);
+  }
 
   window.requestAnimationFrame(updateFrame);
 }
@@ -152,6 +155,7 @@ function createGui() {
   const maxRadiusController = objectsFolder.add(options, 'maxRadius', 1, 40, 1).listen();
   const minSpeedController = objectsFolder.add(options, 'minSpeed', 10, 100, 1).listen();
   const maxSpeedController = objectsFolder.add(options, 'maxSpeed', 10, 100, 1).listen();
+  objectsFolder.add(options, 'freezeMovement');
 
   const retrievalFolder = gui.addFolder('Candidates Retrieval');
   retrievalFolder.add(options, 'testRectEnabled');
@@ -164,7 +168,7 @@ function createGui() {
 
   const rendererFolder = gui.addFolder('Rendering');
   rendererFolder.add(options, 'showBounds');
-  rendererFolder.add(options, 'renderObjects');
+  rendererFolder.add(options, 'drawObjects');
   rendererFolder.add(options, 'highlightCollisions');
   rendererFolder.add(options, 'displayInfo');
   rendererFolder.add(options, 'lineWidth', 1, 10, 1);
@@ -307,9 +311,9 @@ function detectCollisions(canvas, context, objects) {
     const numCandidates = candidates.length;
     numTotalCandidates += numCandidates;
     for (let k = 0; k < numCandidates; ++k) {
-      const other = candidates[k];
-      if (obj.id !== other.id) {
-        if (testCollisionBetweenObjects(obj, other)) {
+      const candidate = candidates[k];
+      if (obj.id !== candidate.id) {
+        if (testCollisionBetweenObjects(obj, candidate)) {
           if (options.highlightCollisions) {
             drawObject(canvas, context, obj, options.collisionColor, true);
           }
