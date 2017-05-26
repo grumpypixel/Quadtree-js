@@ -18,7 +18,7 @@ const options = {
   testRectHeight: 64,
   bruteForceCollisionDetection: false,
   collisionDetectionEnabled: true,
-  showBounds: true,
+  drawBounds: true,
   drawObjects: true,
   highlightCollisions: true,
   displayInfo: true,
@@ -38,7 +38,7 @@ let quadtree = null;
 let objects = [];
 let testRect = { x: 0, y: 0, width: 64, height: 64 };
 let canvasOriginOffset = {};
-let nextObjId = 0;
+let nextId = 0;
 
 window.onload = function() {
   const canvas = getCanvas();
@@ -93,7 +93,7 @@ function updateFrame() {
   timer.update();
   rebuildQuadtree();
 
-  if (options.showBounds) {
+  if (options.drawBounds) {
     quadtree.drawBounds(context, options.boundsColor, canvasOriginOffset, canvas.height);
   }
 
@@ -167,7 +167,7 @@ function createGui() {
   collisionsFolder.add(options, 'bruteForceCollisionDetection');
 
   const rendererFolder = gui.addFolder('Rendering');
-  rendererFolder.add(options, 'showBounds');
+  rendererFolder.add(options, 'drawBounds');
   rendererFolder.add(options, 'drawObjects');
   rendererFolder.add(options, 'highlightCollisions');
   rendererFolder.add(options, 'displayInfo');
@@ -255,7 +255,7 @@ function createRandomObject(color) {
   const x = Random.randomMinMax(-halfWidth + size, halfWidth - size);
   const y = Random.randomMinMax(-halfHeight + size, halfHeight - size);
   const velocity = Random.randomPointInCircle(options.minSpeed, options.maxSpeed);
-  return createObject(x, y, radius, color, velocity, nextId());
+  return createObject(x, y, radius, color, velocity, getNextId());
 }
 
 function createObject(x, y, radius, color, velocity, id) {
@@ -435,6 +435,6 @@ function setCanvasBackgroundColor(value) {
   canvas.style.backgroundColor = value;
 }
 
-function nextId() {
-  return nextObjId++;
+function getNextId() {
+  return nextId++;
 }
