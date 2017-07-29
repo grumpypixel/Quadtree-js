@@ -5,33 +5,33 @@ const textMargin = { top: 20, left: 10, bottom: 20, right: 10 };
 const font = 'bold 16px Courier';
 
 const options = {
-  numObjects: 512,
-  freezeMovement: false,
-  minRadius: 5,
-  maxRadius: 10,
-  minSpeed: 20,
-  maxSpeed: 40,
-  maxObjects: 5,
-  maxLevel: 6,
-  testRectEnabled: false,
-  testRectWidth: 64,
-  testRectHeight: 64,
-  bruteForceCollisionDetection: false,
-  collisionDetectionEnabled: true,
-  drawBounds: true,
-  drawObjects: true,
-  highlightCollisions: true,
-  displayInfo: true,
-  lineWidth: 1,
-  backgroundColor: '#80c080',
-  boundsColor: '#666666',
-  objectColor: '#ffffff',
-  testRectColor: '#ff0000',
-  collisionColor: '#00ff00',
-  infoColor: '#ff00ff',
-  recreate: function() {
-    objects = createObjects(options.numObjects);
-  }
+	numObjects: 512,
+	freezeMovement: false,
+	minRadius: 5,
+	maxRadius: 10,
+	minSpeed: 20,
+	maxSpeed: 40,
+	maxObjects: 5,
+	maxLevel: 6,
+	testRectEnabled: false,
+	testRectWidth: 64,
+	testRectHeight: 64,
+	bruteForceCollisionDetection: false,
+	collisionDetectionEnabled: true,
+	drawBounds: true,
+	drawObjects: true,
+	highlightCollisions: true,
+	displayInfo: true,
+	lineWidth: 1,
+	backgroundColor: '#80c080',
+	boundsColor: '#666666',
+	objectColor: '#ffffff',
+	testRectColor: '#ff0000',
+	collisionColor: '#00ff00',
+	infoColor: '#ff00ff',
+	recreate: function() {
+		objects = createObjects(this.numObjects);
+	}
 }
 
 let quadtree = null;
@@ -41,400 +41,403 @@ let canvasOriginOffset = {};
 let nextId = 0;
 
 window.onload = function() {
-  const canvas = getCanvas();
-  canvas.addEventListener("mousedown", onMouseDown, false);
-  setCanvasBackgroundColor(options.backgroundColor);
+	const canvas = getCanvas();
+	canvas.addEventListener("mousedown", onMouseDown, false);
+	setCanvasBackgroundColor(options.backgroundColor);
 
-  createGui();
+	createGui();
 
-  canvasOriginOffset = { x: canvas.width / 2, y: canvas.height / 2 };
-  quadtree = new Quadtree({ x: 0, y: 0, width: canvas.width, height: canvas.height }, options.maxObjects, options.maxLevel);
-  objects = createObjects(options.numObjects);
+	canvasOriginOffset = { x: canvas.width / 2, y: canvas.height / 2 };
+	quadtree = new Quadtree({ x: 0, y: 0, width: canvas.width, height: canvas.height }, options.maxObjects, options.maxLevel);
+	objects = createObjects(options.numObjects);
 
-  window.requestAnimationFrame(updateFrame);
+	timer.start();
+	window.requestAnimationFrame(updateFrame);
 }
 
 window.onfocus = function() {
-  if (timer) {
-    timer.start();
-  }
+	if (timer) {
+		timer.start();
+	}
 };
 
 window.onblur = function() {
-  if (timer) {
-    timer.stop();
-  }
+	if (timer) {
+		timer.stop();
+	}
 }
 
 function onMouseDown(event) {
-  if (options.testRectEnabled) {
-    const canvas = getCanvas();
+	if (options.testRectEnabled) {
+		const canvas = getCanvas();
 
-    let x = event.x;
-    let y = event.y;
-    x -= canvas.offsetLeft;
-    y -= canvas.offsetTop;
+		let x = event.x;
+		let y = event.y;
+		x -= canvas.offsetLeft;
+		y -= canvas.offsetTop;
 
-    x -= canvasOriginOffset.x;
-    y -= canvasOriginOffset.y;
-    y *= -1;
+		x -= canvasOriginOffset.x;
+		y -= canvasOriginOffset.y;
+		y *= -1;
 
-    testRect.x = x;
-    testRect.y = y;
-  }
+		testRect.x = x;
+		testRect.y = y;
+	}
 }
 
+var test = 0;
+
 function updateFrame() {
-  const canvas = getCanvas();
-  const context = canvas.getContext('2d');
-  context.clearRect(0, 0, canvas.width, canvas.height);
-  context.lineWidth = options.lineWidth;
+	const canvas = getCanvas();
+	const context = canvas.getContext('2d');
+	context.clearRect(0, 0, canvas.width, canvas.height);
+	context.lineWidth = options.lineWidth;
 
-  timer.update();
-  rebuildQuadtree();
+	timer.update();
+	rebuildQuadtree();
 
-  if (options.drawBounds) {
-    quadtree.drawBounds(context, options.boundsColor, canvasOriginOffset, canvas.height);
-  }
+	if (options.drawBounds) {
+		quadtree.drawBounds(context, options.boundsColor, canvasOriginOffset, canvas.height);
+	}
 
-  let collisionDetectionResults = { candidates: 0, collisions: 0 };
-  if (options.collisionDetectionEnabled) {
-    if (options.bruteForceCollisionDetection === false) {
-      collisionDetectionResults = detectCollisions(canvas, context, objects);
-    } else {
-      collisionDetectionResults = detectCollisionsBruteForce(canvas, context, objects);
-    }
-  }
+	let collisionDetectionResults = { candidates: 0, collisions: 0 };
+	if (options.collisionDetectionEnabled) {
+		if (options.bruteForceCollisionDetection === false) {
+			collisionDetectionResults = detectCollisions(canvas, context, objects);
+		} else {
+			collisionDetectionResults = detectCollisionsBruteForce(canvas, context, objects);
+		}
+	}
 
-  if (options.drawObjects) {
-    drawObjects(canvas, context, objects, options.objectColor, false);
-  }
+	if (options.drawObjects) {
+		drawObjects(canvas, context, objects, options.objectColor, false);
+	}
 
-  if (options.testRectEnabled) {
-    const pos = convertCartesianToCanvasCoordinates(canvas, testRect.x, testRect.y);
-    CanvasRenderer.drawRect(context, pos.x - testRect.width * 0.5, pos.y - testRect.height * 0.5, testRect.width, testRect.height, options.testRectColor, false);
+	if (options.testRectEnabled) {
+		const pos = convertCartesianToCanvasCoordinates(canvas, testRect.x, testRect.y);
+		CanvasRenderer.drawRect(context, pos.x - testRect.width * 0.5, pos.y - testRect.height * 0.5, testRect.width, testRect.height, options.testRectColor, false);
 
-    const candidates = [];
-    quadtree.findCandidates(testRect, candidates);
-    drawObjects(canvas, context, candidates, options.testRectColor, false);
+		const candidates = [];
+		quadtree.findCandidates(testRect, candidates);
+		drawObjects(canvas, context, candidates, options.testRectColor, false);
 
-    if (options.displayInfo) {
-      CanvasRenderer.drawText(context, textMargin.left, textMargin.top, 'candidates: ' + candidates.length.toString(), options.testRectColor, 'left', font);
-    }
-  }
+		if (options.displayInfo) {
+			CanvasRenderer.drawText(context, textMargin.left, textMargin.top, 'candidates: ' + candidates.length.toString(), options.testRectColor, 'left', font);
+		}
+	}
 
-  if (options.displayInfo) {
-    CanvasRenderer.drawText(context, canvas.width-textMargin.right, textMargin.top, (timer.deltaTime * 1000).toFixed(2), options.infoColor, 'right', font);
-    CanvasRenderer.drawText(context, textMargin.left, canvas.height-textMargin.bottom, 'retrieved candidates: ' + collisionDetectionResults.candidates.toString(), options.infoColor, 'left', font);
-    CanvasRenderer.drawText(context, canvas.width-textMargin.right, canvas.height-textMargin.bottom, 'detected collisions: ' + collisionDetectionResults.collisions.toString(), options.infoColor, 'right', font);
-  }
+	if (options.displayInfo) {
+		CanvasRenderer.drawText(context, canvas.width-textMargin.right, textMargin.top, (timer.deltaTime * 1000).toFixed(2), options.infoColor, 'right', font);
+		CanvasRenderer.drawText(context, textMargin.left, canvas.height-textMargin.bottom, 'retrieved candidates: ' + collisionDetectionResults.candidates.toString(), options.infoColor, 'left', font);
+		CanvasRenderer.drawText(context, canvas.width-textMargin.right, canvas.height-textMargin.bottom, 'detected collisions: ' + collisionDetectionResults.collisions.toString(), options.infoColor, 'right', font);
+	}
 
-  if (options.freezeMovement === false) {
-    const bounds = {
-      left: -canvas.width * 0.5,
-      right: canvas.width * 0.5,
-      top: canvas.height * 0.5,
-      bottom: -canvas.height * 0.5
-    };
-    updateObjectPositions(objects, timer.deltaTime, bounds);
-  }
+	if (options.freezeMovement === false) {
+		const bounds = {
+			left: -canvas.width * 0.5,
+			right: canvas.width * 0.5,
+			top: canvas.height * 0.5,
+			bottom: -canvas.height * 0.5
+		};
+		updateObjectPositions(objects, timer.deltaTime, bounds);
+	}
 
-  window.requestAnimationFrame(updateFrame);
+	window.requestAnimationFrame(updateFrame);
 }
 
 function createGui() {
-  const gui = new dat.gui.GUI();
+	const gui = new dat.gui.GUI();
 
-  const quadtreeFolder = gui.addFolder('Quadtree');
-  const maxObjectsController = quadtreeFolder.add(options, 'maxObjects', 1, 100, 1);
-  const maxLevelController = quadtreeFolder.add(options, 'maxLevel', 1, 10, 1);
+	const quadtreeFolder = gui.addFolder('Quadtree');
+	const maxObjectsController = quadtreeFolder.add(options, 'maxObjects', 1, 100, 1);
+	const maxLevelController = quadtreeFolder.add(options, 'maxLevel', 1, 10, 1);
 
-  const objectsFolder = gui.addFolder('Objects');
-  const numObjectsController = objectsFolder.add(options, 'numObjects', 1, 4096, 1);
-  const minRadiusController = objectsFolder.add(options, 'minRadius', 1, 40, 1).listen();
-  const maxRadiusController = objectsFolder.add(options, 'maxRadius', 1, 40, 1).listen();
-  const minSpeedController = objectsFolder.add(options, 'minSpeed', 10, 100, 1).listen();
-  const maxSpeedController = objectsFolder.add(options, 'maxSpeed', 10, 100, 1).listen();
-  objectsFolder.add(options, 'freezeMovement');
+	const objectsFolder = gui.addFolder('Objects');
+	const numObjectsController = objectsFolder.add(options, 'numObjects', 1, 4096, 1);
+	const minRadiusController = objectsFolder.add(options, 'minRadius', 1, 40, 1).listen();
+	const maxRadiusController = objectsFolder.add(options, 'maxRadius', 1, 40, 1).listen();
+	const minSpeedController = objectsFolder.add(options, 'minSpeed', 10, 100, 1).listen();
+	const maxSpeedController = objectsFolder.add(options, 'maxSpeed', 10, 100, 1).listen();
+	objectsFolder.add(options, 'freezeMovement');
 
-  const retrievalFolder = gui.addFolder('Candidates Retrieval');
-  retrievalFolder.add(options, 'testRectEnabled');
-  const testRectWidthController = retrievalFolder.add(options, 'testRectWidth', 8, 256, 1);
-  const testRectHeightController = retrievalFolder.add(options, 'testRectHeight', 8, 256, 1);
+	const retrievalFolder = gui.addFolder('Candidates Retrieval');
+	retrievalFolder.add(options, 'testRectEnabled');
+	const testRectWidthController = retrievalFolder.add(options, 'testRectWidth', 8, 256, 1);
+	const testRectHeightController = retrievalFolder.add(options, 'testRectHeight', 8, 256, 1);
 
-  const collisionsFolder = gui.addFolder('Collision Detection');
-  collisionsFolder.add(options, 'collisionDetectionEnabled');
-  collisionsFolder.add(options, 'bruteForceCollisionDetection');
+	const collisionsFolder = gui.addFolder('Collision Detection');
+	collisionsFolder.add(options, 'collisionDetectionEnabled');
+	collisionsFolder.add(options, 'bruteForceCollisionDetection');
 
-  const rendererFolder = gui.addFolder('Rendering');
-  rendererFolder.add(options, 'drawBounds');
-  rendererFolder.add(options, 'drawObjects');
-  rendererFolder.add(options, 'highlightCollisions');
-  rendererFolder.add(options, 'displayInfo');
-  rendererFolder.add(options, 'lineWidth', 1, 10, 1);
+	const rendererFolder = gui.addFolder('Rendering');
+	rendererFolder.add(options, 'drawBounds');
+	rendererFolder.add(options, 'drawObjects');
+	rendererFolder.add(options, 'highlightCollisions');
+	rendererFolder.add(options, 'displayInfo');
+	rendererFolder.add(options, 'lineWidth', 1, 10, 1);
 
-  const colorsFolder = gui.addFolder('Colors');
-  const backgroundColorController = colorsFolder.addColor(options, 'backgroundColor');
-  colorsFolder.addColor(options, 'boundsColor');
-  colorsFolder.addColor(options, 'objectColor');
-  colorsFolder.addColor(options, 'testRectColor');
-  colorsFolder.addColor(options, 'collisionColor');
-  colorsFolder.addColor(options, 'infoColor');
+	const colorsFolder = gui.addFolder('Colors');
+	const backgroundColorController = colorsFolder.addColor(options, 'backgroundColor');
+	colorsFolder.addColor(options, 'boundsColor');
+	colorsFolder.addColor(options, 'objectColor');
+	colorsFolder.addColor(options, 'testRectColor');
+	colorsFolder.addColor(options, 'collisionColor');
+	colorsFolder.addColor(options, 'infoColor');
 
-  gui.add(options, 'recreate');
+	gui.add(options, 'recreate');
 
-  numObjectsController.onChange(function(value) {
-    if (value === objects.length) {
-      return;
-    }
-    if (value > objects.length) {
-      while (objects.length < value) {
-        objects.push(createRandomObject(options.objectColor));
-      }
-    } else {
-      while (objects.length > value) {
-        objects.pop();
-      }
-    }
-  });
-  minRadiusController.onChange(function(value) {
-    setObjectsMinRadius(value);
-    if (value > options.maxRadius) {
-      options.maxRadius = value;
-    }
-  });
-  maxRadiusController.onChange(function(value) {
-    setObjectsMaxRadius(value);
-    if (value < options.minRadius) {
-      options.minRadius = value;
-    }
-  });
-  minSpeedController.onChange(function(value) {
-    setObjectsMinSpeed(value);
-    if (value > options.maxSpeed) {
-      options.maxSpeed = value;
-    }
-  });
-  maxSpeedController.onChange(function(value) {
-    setObjectsMaxSpeed(value);
-    if (value < options.minSpeed) {
-      options.minSpeed = value;
-    }
-  });
-  maxObjectsController.onChange(function(value) {
-    quadtree.maxObjects = value;
-  });
-  maxLevelController.onChange(function(value) {
-    quadtree.maxLevel = value;
-  });
-  testRectWidthController.onChange(function(value) {
-    testRect.width = value;
-  });
-  testRectHeightController.onChange(function(value) {
-    testRect.height = value;
-  });
-  backgroundColorController.onChange(function(value) {
-    setCanvasBackgroundColor(value);
-  });
+	numObjectsController.onChange(value => {
+		if (value === objects.length) {
+			return;
+		}
+		if (value > objects.length) {
+			while (objects.length < value) {
+				objects.push(createRandomObject(options.objectColor));
+			}
+		} else {
+			while (objects.length > value) {
+				objects.pop();
+			}
+		}
+	});
+	minRadiusController.onChange(value => {
+		setObjectsMinRadius(value);
+		if (value > options.maxRadius) {
+			options.maxRadius = value;
+		}
+	});
+	maxRadiusController.onChange(value => {
+		setObjectsMaxRadius(value);
+		if (value < options.minRadius) {
+			options.minRadius = value;
+		}
+	});
+	minSpeedController.onChange(value => {
+		setObjectsMinSpeed(value);
+		if (value > options.maxSpeed) {
+			options.maxSpeed = value;
+		}
+	});
+	maxSpeedController.onChange(value => {
+		setObjectsMaxSpeed(value);
+		if (value < options.minSpeed) {
+			options.minSpeed = value;
+		}
+	});
+	maxObjectsController.onChange(value => {
+		quadtree.maxObjects = value;
+	});
+	maxLevelController.onChange(value => {
+		quadtree.maxLevel = value;
+	});
+	testRectWidthController.onChange(value => {
+		testRect.width = value;
+	});
+	testRectHeightController.onChange(value => {
+		testRect.height = value;
+	});
+	backgroundColorController.onChange(value => {
+		setCanvasBackgroundColor(value);
+	});
 }
 
 function createObjects(objectCount) {
-  const objs = [];
-  for (let i = 0; i < objectCount; ++i) {
-    objs.push(createRandomObject(options.objectColor));
-  }
-  return objs;
+	const objs = [];
+	for (let i = 0; i < objectCount; ++i) {
+		objs.push(createRandomObject(options.objectColor));
+	}
+	return objs;
 }
 
 function createRandomObject(color) {
-  const canvas = getCanvas();
-  const radius = Random.randomMinMax(options.minRadius, options.maxRadius);
-  const size = 2 * radius;
-  const halfWidth = canvas.width * 0.5;
-  const halfHeight = canvas.height * 0.5;
-  const x = Random.randomMinMax(-halfWidth + size, halfWidth - size);
-  const y = Random.randomMinMax(-halfHeight + size, halfHeight - size);
-  const velocity = Random.randomPointInCircle(options.minSpeed, options.maxSpeed);
-  return createObject(x, y, radius, color, velocity, getNextId());
+	const canvas = getCanvas();
+	const radius = Random.randomMinMax(options.minRadius, options.maxRadius);
+	const size = 2 * radius;
+	const halfWidth = canvas.width * 0.5;
+	const halfHeight = canvas.height * 0.5;
+	const x = Random.randomMinMax(-halfWidth + size, halfWidth - size);
+	const y = Random.randomMinMax(-halfHeight + size, halfHeight - size);
+	const velocity = Random.randomPointInCircle(options.minSpeed, options.maxSpeed);
+	return createObject(x, y, radius, color, velocity, getNextId());
 }
 
 function createObject(x, y, radius, color, velocity, id) {
-  const size = 2 * radius;
-  return {
-    x: x,
-    y: y,
-    width: size,
-    height: size,
-    color: color,
-    radius: radius,
-    velocity: velocity,
-    id: id
-  };
+	const size = 2 * radius;
+	return {
+		x: x,
+		y: y,
+		width: size,
+		height: size,
+		color: color,
+		radius: radius,
+		velocity: velocity,
+		id: id
+	};
 }
 
 function updateObjectPositions(objects, deltaTime, bounds) {
-  const count = objects.length;
-  for (let i = 0; i < count; ++i) {
-    const obj = objects[i];
-    obj.x += obj.velocity.x * deltaTime;
-    obj.y += obj.velocity.y * deltaTime;
+	const count = objects.length;
+	for (let i = 0; i < count; ++i) {
+		const obj = objects[i];
+		obj.x += obj.velocity.x * deltaTime;
+		obj.y += obj.velocity.y * deltaTime;
 
-    const radius = obj.radius;
-    if (obj.x <= bounds.left + radius && obj.velocity.x < 0 || obj.x >= bounds.right - radius && obj.velocity.x > 0) {
-      obj.velocity.x *= -1;
-    }
-    if (obj.x < bounds.left + radius) {
-      obj.x = bounds.left + radius;
-    } else if (obj.x > bounds.right - radius) {
-      obj.x = bounds.right - radius;
-    }
-    if (obj.y <= bounds.bottom + radius && obj.velocity.y < 0 || obj.y >= bounds.top - radius && obj.velocity.y > 0) {
-      obj.velocity.y *= -1;
-    }
-    if (obj.y < bounds.bottom + radius) {
-      obj.y = bounds.bottom + radius;
-    } else if (obj.y > bounds.top - radius) {
-      obj.y = bounds.top - radius;
-    }
-  }
+		const radius = obj.radius;
+		if (obj.x <= bounds.left + radius && obj.velocity.x < 0 || obj.x >= bounds.right - radius && obj.velocity.x > 0) {
+			obj.velocity.x *= -1;
+		}
+		if (obj.x < bounds.left + radius) {
+			obj.x = bounds.left + radius;
+		} else if (obj.x > bounds.right - radius) {
+			obj.x = bounds.right - radius;
+		}
+		if (obj.y <= bounds.bottom + radius && obj.velocity.y < 0 || obj.y >= bounds.top - radius && obj.velocity.y > 0) {
+			obj.velocity.y *= -1;
+		}
+		if (obj.y < bounds.bottom + radius) {
+			obj.y = bounds.bottom + radius;
+		} else if (obj.y > bounds.top - radius) {
+			obj.y = bounds.top - radius;
+		}
+	}
 }
 
 function detectCollisions(canvas, context, objects) {
-  let numTotalCandidates = 0;
-  let numTotalCollisions = 0;
-  const candidates = [];
-  const count = objects.length;
-  for (let i = 0; i < count; ++i) {
-    const obj = objects[i];
-    candidates.length = 0;
-    quadtree.findCandidates(obj, candidates);
-    const numCandidates = candidates.length;
-    numTotalCandidates += numCandidates;
-    for (let k = 0; k < numCandidates; ++k) {
-      const candidate = candidates[k];
-      if (obj.id !== candidate.id) {
-        if (testCollisionBetweenObjects(obj, candidate)) {
-          if (options.highlightCollisions) {
-            drawObject(canvas, context, obj, options.collisionColor, true);
-          }
-          numTotalCollisions += 1;
-        }
-      }
-    }
-  }
-  return { candidates: numTotalCandidates, collisions: numTotalCollisions };
+	let numTotalCandidates = 0;
+	let numTotalCollisions = 0;
+	const candidates = [];
+	const count = objects.length;
+	for (let i = 0; i < count; ++i) {
+		const obj = objects[i];
+		candidates.length = 0;
+		quadtree.findCandidates(obj, candidates);
+		const numCandidates = candidates.length;
+		numTotalCandidates += numCandidates;
+		for (let k = 0; k < numCandidates; ++k) {
+			const candidate = candidates[k];
+			if (obj.id !== candidate.id) {
+				if (testCollisionBetweenObjects(obj, candidate)) {
+					if (options.highlightCollisions) {
+						drawObject(canvas, context, obj, options.collisionColor, true);
+					}
+					numTotalCollisions += 1;
+				}
+			}
+		}
+	}
+	return { candidates: numTotalCandidates, collisions: numTotalCollisions };
 }
 
 function detectCollisionsBruteForce(canvas, context, objects) {
-  let numTotalCandidates = 0;
-  let numTotalCollisions = 0;
-  const count = objects.length;
-  for (let i = 0; i < count-1; ++i) {
-    for (let j = i+1; j < count; ++j) {
-      if (objects[i].id !== objects[j].id) {
-        numTotalCandidates += 1;
-        if (testCollisionBetweenObjects(objects[i], objects[j])) {
-          if (options.highlightCollisions) {
-            drawObject(canvas, context, objects[i], options.collisionColor, true);
-            drawObject(canvas, context, objects[j], options.collisionColor, true);
-          }
-          numTotalCollisions += 2;
-        }
-      }
-    }
-  }
-  return { candidates: numTotalCandidates, collisions: numTotalCollisions };
+	let numTotalCandidates = 0;
+	let numTotalCollisions = 0;
+	const count = objects.length;
+	for (let i = 0; i < count-1; ++i) {
+		for (let j = i+1; j < count; ++j) {
+			if (objects[i].id !== objects[j].id) {
+				numTotalCandidates += 1;
+				if (testCollisionBetweenObjects(objects[i], objects[j])) {
+					if (options.highlightCollisions) {
+						drawObject(canvas, context, objects[i], options.collisionColor, true);
+						drawObject(canvas, context, objects[j], options.collisionColor, true);
+					}
+					numTotalCollisions += 2;
+				}
+			}
+		}
+	}
+	return { candidates: numTotalCandidates, collisions: numTotalCollisions };
 }
 
 function testCollisionBetweenObjects(lhs, rhs) {
-  const dx = lhs.x - rhs.x;
-  const dy = lhs.y - rhs.y;
-  const radii = lhs.radius + rhs.radius;
-  return (dx ** 2 + dy ** 2 < radii ** 2);
+	const dx = lhs.x - rhs.x;
+	const dy = lhs.y - rhs.y;
+	const radii = lhs.radius + rhs.radius;
+	return (dx ** 2 + dy ** 2 < radii ** 2);
 }
 
 function drawObjects(canvas, context, objects, color, fill) {
-  const count = objects.length;
-  for (let i = 0; i < count; ++i) {
-    const obj = objects[i];
-    const pos = convertCartesianToCanvasCoordinates(canvas, obj.x, obj.y);
-    CanvasRenderer.drawCircle(context, pos.x, pos.y, obj.radius, color || options.objectColor, fill);
-  }
+	const count = objects.length;
+	for (let i = 0; i < count; ++i) {
+		const obj = objects[i];
+		const pos = convertCartesianToCanvasCoordinates(canvas, obj.x, obj.y);
+		CanvasRenderer.drawCircle(context, pos.x, pos.y, obj.radius, color || options.objectColor, fill);
+	}
 }
 
 function drawObject(canvas, context, obj, color, fill) {
-  const pos = convertCartesianToCanvasCoordinates(canvas, obj.x, obj.y);
-  CanvasRenderer.drawCircle(context, pos.x, pos.y, obj.radius, color, fill);
+	const pos = convertCartesianToCanvasCoordinates(canvas, obj.x, obj.y);
+	CanvasRenderer.drawCircle(context, pos.x, pos.y, obj.radius, color, fill);
 }
 
 function setObjectRadius(obj, radius) {
-  obj.radius = radius;
-  obj.width = obj.height = 2 * radius;
+	obj.radius = radius;
+	obj.width = obj.height = 2 * radius;
 }
 
 function setObjectsMinRadius(minRadius) {
-  const count = objects.length;
-  for (let i = 0; i < count; ++i) {
-    if (objects[i].radius < minRadius) {
-      setObjectRadius(objects[i], minRadius);
-    }
-  }
+	const count = objects.length;
+	for (let i = 0; i < count; ++i) {
+		if (objects[i].radius < minRadius) {
+			setObjectRadius(objects[i], minRadius);
+		}
+	}
 }
 
 function setObjectsMaxRadius(maxRadius) {
-  const count = objects.length;
-  for (let i = 0; i < count; ++i) {
-    if (objects[i].radius > maxRadius) {
-      setObjectRadius(objects[i], maxRadius);
-    }
-  }
+	const count = objects.length;
+	for (let i = 0; i < count; ++i) {
+		if (objects[i].radius > maxRadius) {
+			setObjectRadius(objects[i], maxRadius);
+		}
+	}
 }
 
 function setObjectsMinSpeed(minSpeed) {
-  const count = objects.length;
-  const sqrSpeed = minSpeed ** 2;
-  for (let i = 0; i < count; ++i) {
-    if (Vector2.sqrMagnitude(objects[i].velocity) < sqrSpeed) {
-      const dir = Vector2.normalized(objects[i].velocity);
-      objects[i].velocity = Vector2.scaled(dir, minSpeed);
-    }
-  }
+	const count = objects.length;
+	const sqrSpeed = minSpeed ** 2;
+	for (let i = 0; i < count; ++i) {
+		if (Vector2.sqrMagnitude(objects[i].velocity) < sqrSpeed) {
+			const dir = Vector2.normalized(objects[i].velocity);
+			objects[i].velocity = Vector2.scaled(dir, minSpeed);
+		}
+	}
 }
 
 function setObjectsMaxSpeed(maxSpeed) {
-  const count = objects.length;
-  const sqrSpeed = maxSpeed ** 2;
-  for (let i = 0; i < count; ++i) {
-    if (Vector2.sqrMagnitude(objects[i].velocity) > sqrSpeed) {
-      const dir = Vector2.normalized(objects[i].velocity);
-      objects[i].velocity = Vector2.scaled(dir, maxSpeed);
-    }
-  }
+	const count = objects.length;
+	const sqrSpeed = maxSpeed ** 2;
+	for (let i = 0; i < count; ++i) {
+		if (Vector2.sqrMagnitude(objects[i].velocity) > sqrSpeed) {
+			const dir = Vector2.normalized(objects[i].velocity);
+			objects[i].velocity = Vector2.scaled(dir, maxSpeed);
+		}
+	}
 }
 
 function rebuildQuadtree() {
-  quadtree.clear();
-  const count = objects.length;
-  for (let i = 0; i < count; ++i) {
-    quadtree.insert(objects[i]);
-  }
+	quadtree.clear();
+	const count = objects.length;
+	for (let i = 0; i < count; ++i) {
+		quadtree.insert(objects[i]);
+	}
 }
 
 function convertCartesianToCanvasCoordinates(canvas, x, y) {
-  const xx = x + canvasOriginOffset.x;
-  const yy = canvas.height - (y + canvasOriginOffset.y);
-  return { x: xx, y: yy };
+	const xx = x + canvasOriginOffset.x;
+	const yy = canvas.height - (y + canvasOriginOffset.y);
+	return { x: xx, y: yy };
 }
 
 function getCanvas() {
-  return document.getElementById('canvas');
+	return document.getElementById('canvas');
 }
 
 function setCanvasBackgroundColor(value) {
-  const canvas = getCanvas();
-  canvas.style.backgroundColor = value;
+	const canvas = getCanvas();
+	canvas.style.backgroundColor = value;
 }
 
 function getNextId() {
-  return nextId++;
+	return nextId++;
 }
